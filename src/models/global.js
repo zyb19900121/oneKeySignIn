@@ -2,31 +2,14 @@
  * @Author: zhangyanbin
  * @Date: 2021-06-03 17:55:32
  * @LastEditors: zhangyanbin
- * @LastEditTime: 2021-06-04 15:34:52
+ * @LastEditTime: 2021-06-07 17:17:49
  * @Description: file content
  */
 
-// export interface IndexModelState {
-//   name: string;
-// }
+import moment from "moment";
 
-// export interface IndexModelType {
-//   namespace: 'index';
-//   state: IndexModelState;
-//   effects: {
-//     query: Effect,
-//   };
-//   reducers: {
-//     save: Reducer<IndexModelState>,
-//     // 启用 immer 之后
-//     // save: ImmerReducer<IndexModelState>;
-//   };
-//   subscriptions: { setup: Subscription };
-// }
-
-// const IndexModel: IndexModelType = {
 const global = {
-  namespace: 'global',
+  namespace: "global",
 
   state: {
     signList: [],
@@ -34,19 +17,40 @@ const global = {
 
   effects: {
     *getSignList({ payload }, { call, put }) {
-      let signList = window.ipcRenderer.sendSync('getSignList');
-      yield put({
-        type: 'save',
-        payload: signList,
-      });
+      let signList = window.ipcRenderer.sendSync("getSignList");
+      if (signList) {
+        yield put({
+          type: "save",
+          payload: signList,
+        });
+      }
     },
     *createSignItem({ payload, callback }, { call, put, select }) {
       let oldSignList = yield select((state) => state.global.signList);
       let newSignList = [...oldSignList, payload];
-      let isSuccess = window.ipcRenderer.sendSync('editSignList', newSignList);
-      if (isSuccess == 'success') {
+      let isSuccess = window.ipcRenderer.sendSync("editSignList", newSignList);
+      if (isSuccess == "success") {
         yield put({
-          type: 'save',
+          type: "save",
+          payload: newSignList,
+        });
+      } else {
+      }
+      callback && callback(isSuccess);
+    },
+    *signItem({ payload, callback }, { call, put, select }) {
+      let oldSignList = yield select((state) => state.global.signList);
+      let oldSignItem = {
+        ...oldSignList[payload],
+        latestSignInTime: moment().format("YYYY-MM-DD HH:mm:ss"),
+      };
+      oldSignList.splice(payload, 1);
+      oldSignList.unshift(oldSignItem);
+      let newSignList = [...oldSignList];
+      let isSuccess = window.ipcRenderer.sendSync("editSignList", newSignList);
+      if (isSuccess == "success") {
+        yield put({
+          type: "save",
           payload: newSignList,
         });
       } else {
@@ -59,10 +63,10 @@ const global = {
 
       let newSignList = [...oldSignList];
 
-      let isSuccess = window.ipcRenderer.sendSync('editSignList', oldSignList);
-      if (isSuccess == 'success') {
+      let isSuccess = window.ipcRenderer.sendSync("editSignList", oldSignList);
+      if (isSuccess == "success") {
         yield put({
-          type: 'save',
+          type: "save",
           payload: newSignList,
         });
       } else {
