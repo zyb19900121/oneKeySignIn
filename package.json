@@ -9,7 +9,7 @@
     "start": "concurrently \"npm run start:main\" \"npm run start:renderer\" ",
     "build": "umi build",
     "dist": "electron-builder",
-    "start:main": "electron .",
+    "start:main": "NODE_ENV=development electron .",
     "start:renderer": "umi dev",
     "postinstall": "umi generate tmp",
     "prettier": "prettier --write '**/*.{js,jsx,tsx,ts,less,md,json}'",
@@ -23,7 +23,12 @@
     "appId": "your.id",
     "mac": {
       "category": "your.app.category.type"
-    }
+    },
+    "files": [
+      "dist/renderer",
+      "main.js",
+      "preload.js"
+    ]
   },
   "lint-staged": {
     "*.{js,jsx,less,md,json}": [
@@ -36,7 +41,6 @@
   "dependencies": {
     "@ant-design/pro-layout": "^6.5.0",
     "@umijs/preset-react": "1.x",
-    "electron-reload": "^1.5.0",
     "electron-store": "^8.0.0",
     "fs-extra": "^8.1.0",
     "iconv-lite": "^0.6.3",
@@ -51,7 +55,6 @@
     "babel-register": "^6.26.0",
     "electron": "^13.1.0",
     "electron-builder": "^22.10.5",
-    "electron-reloader": "^1.2.1",
     "iconv-lite": "^0.6.3",
     "lint-staged": "^10.0.7",
     "prettier": "^2.2.0",

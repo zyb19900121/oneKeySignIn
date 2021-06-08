@@ -2,7 +2,7 @@
  * @Author: zhangyanbin
  * @Date: 2021-06-03 10:45:57
  * @LastEditors: zhangyanbin
- * @LastEditTime: 2021-06-07 17:06:20
+ * @LastEditTime: 2021-06-08 11:23:47
  * @Description: file content
  */
 // main.js
@@ -11,14 +11,15 @@
 const { app, BrowserWindow, ipcMain, net } = require("electron");
 const FormData = require("form-data");
 const path = require("path");
+const url = require("url");
 const fs = require("fs");
 const Store = require("electron-store");
 
-// Enable live reload for Electron too
-require("electron-reload")(__dirname, {
-  // Note that the path to electron may vary according to the main file
-  electron: require(`${__dirname}/node_modules/electron`),
-});
+// // Enable live reload for Electron too
+// require("electron-reload")(__dirname, {
+//   // Note that the path to electron may vary according to the main file
+//   electron: require(`${__dirname}/node_modules/electron`),
+// });
 
 function createWindow() {
   // Create the browser window.
@@ -27,7 +28,7 @@ function createWindow() {
     height: 600,
     minWidth: 450,
     minHeight: 600,
-    // maxWidth: 450,
+    maxWidth: 450,
     maxHeight: 600,
     webPreferences: {
       contextIsolation: true,
@@ -37,10 +38,26 @@ function createWindow() {
 
   // and load the index.html of the app.
   // mainWindow.loadFile('index.html');
-  mainWindow.loadURL("http://localhost:8000/");
+  // mainWindow.loadURL("http://localhost:8000/");
+
+  console.log("process.env.NODE_ENV: ", process.env.NODE_ENV);
+  if (process.env.NODE_ENV === "development") {
+    mainWindow.loadURL("http://localhost:8000/");
+    if (process.env.DEV_TOOLS) {
+      mainWindow.webContents.openDevTools();
+    }
+  } else {
+    mainWindow.loadURL(
+      url.format({
+        pathname: path.join(__dirname, "/dist/renderer/index.html"),
+        protocol: "file:",
+        slashes: true,
+      })
+    );
+  }
 
   // Open the DevTools.
-  mainWindow.webContents.openDevTools();
+  // mainWindow.webContents.openDevTools();
 
   handleGetSignList();
   handleEditSignList();
